@@ -1,11 +1,12 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from app.models.article_match import ArticleMatch
+from app.models.tracked_keyword import TrackedKeyword
 from app.models.article import Article
 from app.database import engine, Base, get_db
 from app.models.journalist import Journalist
 from app.schemas.journalist import JournalistCreate
-from app.models.tracked_keyword import TrackedKeyword
 from app.schemas.tracked_keyword import TrackedKeywordCreate
 
 Base.metadata.create_all(bind=engine)
@@ -54,6 +55,7 @@ def get_journalists(db: Session = Depends(get_db)):
 @app.get("/articles")
 def get_articles(db: Session = Depends(get_db)):
     return db.query(Article).all()
+
 @app.post("/keywords")
 def create_keyword(
     keyword: TrackedKeywordCreate,
@@ -81,9 +83,42 @@ def create_keyword(
 
     return new_keyword
 
-
 @app.get("/keywords")
 def get_keywords(
     db: Session = Depends(get_db)
 ):
+    return db.query(TrackedKeyword).all()
+
+
+@app.get("/matches")
+def get_matches(
+    db: Session = Depends(get_db)
+):
+    matches = db.query(ArticleMatch).all()
+
+    results = []
+
+    for match in matches:
+
+        article = (
+            db.query(Article)
+            .filter(Article.id == match.article_id)
+            .first()
+        )
+
+        keyword = (
+            db.query(TrackedKeyword)
+            .filter(TrackedKeyword.id == match.keyword_id)
+            .first()
+        )
+
+        results.append(
+            {
+                "article_title": article.title,
+                "keyword": keyword.keyword
+            }
+        )
+
+    return results
+
     return db.query(TrackedKeyword).all()
