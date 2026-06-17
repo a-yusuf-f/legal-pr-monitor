@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 
+from app.workers.rss_worker import run
 from app.models.article_match import ArticleMatch
 from app.models.tracked_keyword import TrackedKeyword
 from app.models.article import Article
@@ -122,3 +123,12 @@ def get_matches(
     return results
 
     return db.query(TrackedKeyword).all()
+
+@app.post("/run-rss-worker")
+def run_rss_worker():
+
+    run()
+
+    return {
+        "message": "RSS worker completed successfully"
+    }
