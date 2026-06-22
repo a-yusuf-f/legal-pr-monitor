@@ -19,7 +19,13 @@ def run():
 
     keywords = db.query(TrackedKeyword).all()
 
+    articles_processed = 0
+    articles_added = 0
+    matches_created = 0
+
     for entry in feed.entries[:5]:
+
+        articles_processed += 1
 
         existing_article = (
             db.query(Article)
@@ -38,6 +44,8 @@ def run():
 
             db.add(article)
             db.flush()
+
+            articles_added += 1
 
         for keyword in keywords:
 
@@ -62,15 +70,16 @@ def run():
 
                 db.add(match)
 
+                matches_created += 1
+
     db.commit()
     db.close()
 
-    print("RSS ingestion complete")
-
+    return {
+        "articles_processed": articles_processed,
+        "articles_added": articles_added,
+        "matches_created": matches_created
+    }
 
 if __name__ == "__main__":
-    run()
-
-
-if __name__ == "__main__":
-    run()
+    print(run())

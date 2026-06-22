@@ -127,8 +127,4 @@ def get_matches(
 @app.post("/run-rss-worker")
 def run_rss_worker():
 
-    run()
-
-    return {
-        "message": "RSS worker completed successfully"
-    }
+    return run()
